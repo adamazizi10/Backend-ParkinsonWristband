@@ -6,19 +6,34 @@ const handleRegister = (req, res, db) => {
     }
 
     db('patient')
-        .insert({ first_name, last_name, age })
-        .returning('*')
-        .then(user => {
-            if (user.length > 0) {
-                console.log('hi')
-                res.status(201).json(user[0]);
+        .select('*')
+        .where({ first_name, last_name, age })
+        .then(existingPatients => {
+            if (existingPatients.length > 0) {
+                res.status(400).json({ error: "Patient Already Exists" });
             } else {
-                res.status(500).json({ error: "Failed to register user." });
+                // If the patient doesn't exist, insert it into the database.
+                db('patient')
+                    .insert({ first_name, last_name, age })
+                    .returning('*')
+                    .then(user => {
+                        if (user.length > 0) {
+                            res.status(201).json(user[0]);
+                            console.log(user[0]);
+                        } else {
+                            res.status(500).json({ error: "Failed to register user." });
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        res.status(500).json({ error: "Internal server error." });
+                    });
             }
         })
         .catch(error => {
             console.error(error);
             res.status(500).json({ error: "Internal server error." });
         });
-}
+};
+
 export default { handleRegister };
