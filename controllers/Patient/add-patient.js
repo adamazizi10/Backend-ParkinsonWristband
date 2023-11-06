@@ -1,20 +1,20 @@
-const handleRegister = (req, res, db) => {
-    const { first_name, last_name, age } = req.body;
+const handleAddPatient = (req, res, db) => {
+    const { first_name, last_name, age, doctor_id, parkinson_status} = req.body;
 
-    if (!first_name || !last_name || !age) {
+    if (!first_name || !last_name || !age || !doctor_id) {
         return res.status(400).json({ error: "Please provide all required fields." });
     }
 
     db('patient')
         .select('*')
-        .where({ first_name, last_name, age })
+        .where({ first_name, last_name, age, doctor_id, parkinson_status })
         .then(existingPatients => {
             if (existingPatients.length > 0) {
                 res.status(400).json({ error: "Patient Already Exists" });
             } else {
-                // If the patient doesn't exist, insert it into the database.
+                // Include the doctor_id when inserting the patient data
                 db('patient')
-                    .insert({ first_name, last_name, age })
+                    .insert({ first_name, last_name, age, parkinson_status, doctor_id })
                     .returning('*')
                     .then(user => {
                         if (user.length > 0) {
@@ -36,4 +36,4 @@ const handleRegister = (req, res, db) => {
         });
 };
 
-export default { handleRegister };
+export default { handleAddPatient };
