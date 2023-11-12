@@ -23,7 +23,7 @@ const app = express();
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
-
+app.get('/', (req, res) => res.send('<h1>It is working</h1>'));
 //Patient
 app.post('/add-patient', (req, res) => addPatient.handleAddPatient(req, res, db));
 app.get('/get-specific-patient-details/:id', (req, res) => getSpecificPatientDetails.handleGetSpecificPatientDetails(req, res, db)); //Get Specific Patient's Data
