@@ -3,7 +3,7 @@ const handleGetSpecificPatientDetails = (req, res, db) => {
 
     // Query your database to retrieve patient details based on patientId
     db('patient')
-        .select('first_name', 'last_name', 'age', 'parkinson_status', /* other patient details */)
+        .select('*', /* other patient details */)
         .where('id', patientId) // Assuming your patient table has an 'id' column
         .then((patientDetails) => {
             if (patientDetails.length === 0) {

@@ -19,7 +19,6 @@ const handleDoctorRegistration = (req, res, db) => {
                     .returning('*') // Return the required fields
                     .then(doctorData => {
                         res.status(201).json(doctorData[0]);
-                        console.log('Doctor registered with ID:', doctorData[0].id);
                     })
                     .catch(error => {
                         console.error(error);

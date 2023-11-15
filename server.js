@@ -35,7 +35,7 @@ app.post('/signinDoctor', (req, res) => signinDoctor.handleDoctorSignIn(req, res
 app.get('/get-all-doctor-data', (req, res) => getAllDoctorData.handleAllDoctorData(req, res, db)); 
 
 //Data
-app.get('/extract-microcontroller-data', async (req, res) => extractMicrocontrollerData.handleExtractMicrocontrollerData(req, res, db));
+app.get('/extract-microcontroller-data/:id', async (req, res) => extractMicrocontrollerData.handleExtractMicrocontrollerData(req, res, db));
 
 
 app.listen(3001, () => console.log('App is running on port 3001'));
