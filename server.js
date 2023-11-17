@@ -23,7 +23,6 @@ const app = express();
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
-app.get('/', (req, res) => res.send('<h1>It is working</h1>'));
 //Patient
 app.post('/add-patient', (req, res) => addPatient.handleAddPatient(req, res, db));
 app.get('/get-specific-patient-details/:id', (req, res) => getSpecificPatientDetails.handleGetSpecificPatientDetails(req, res, db)); //Get Specific Patient's Data
@@ -37,5 +36,6 @@ app.get('/get-all-doctor-data', (req, res) => getAllDoctorData.handleAllDoctorDa
 //Data
 app.get('/extract-microcontroller-data/:id', async (req, res) => extractMicrocontrollerData.handleExtractMicrocontrollerData(req, res, db));
 
-
-app.listen(3001, () => console.log('App is running on port 3001'));
+const port = 3001
+app.get('/', (req, res) => res.send(`<h1>Parkinson Backend Server is running on port ${port}</h1>`));
+app.listen(port, () => console.log(`Parkinson Backend Server is running on port ${port}`));

@@ -27,5 +27,11 @@ def double_data():
         print('Error processing data:', str(e))
         return jsonify({'error': 'An error occurred'}), 500
 
+portNum= 3002
+@app.route('/', methods=['GET'])
+def home():
+    return f'<h1>Python Script is running on port {portNum}'
+
+
 if __name__ == '__main__':
-    app.run(port=5000)
+    app.run(port=portNum)

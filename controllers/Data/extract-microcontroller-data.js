@@ -6,7 +6,7 @@ const handleExtractMicrocontrollerData = async (req, res, db) => {
     //start detection or redetect button is clicked on the frontend. Now we get stuties data
     try {
         // Fetch data from microcontroller server
-        const response = await axios.get('http://127.0.0.1:8080/');
+        const response = await axios.get('http://127.0.0.1:3003/');
         const html = response.data;
 
         const dom = new JSDOM(html);
@@ -24,7 +24,7 @@ const handleExtractMicrocontrollerData = async (req, res, db) => {
         });
         //Send Stuti's data to Huzaifa's script here
         // Make a request to the Python API
-        const pythonApiResponse = await axios.post('http://127.0.0.1:5000/double-data', data);
+        const pythonApiResponse = await axios.post('http://127.0.0.1:3002/double-data', data);
 
         // Get the result from the Python API
         const pythonData = pythonApiResponse.data;
