@@ -1,8 +1,9 @@
 import puppeteer from 'puppeteer';
+import axios from 'axios';
 
 let browser; // Declare browser instance outside the handler
 
-const handleExtractMicrocontrollerData = async (req, res) => {
+const handleExtractMicrocontrollerData = async (req, res, db) => {
     const id = req.params.id;
     const { action } = req.body;
 
@@ -38,10 +39,10 @@ const handleExtractMicrocontrollerData = async (req, res) => {
 
                 // Trim data to only keep the last 5 entries
                 return {
-                    t: data.slice(-20).map(entry => entry.t),
-                    x: data.slice(-20).map(entry => entry.x),
-                    y: data.slice(-20).map(entry => entry.y),
-                    z: data.slice(-20).map(entry => entry.z)
+                    t: data.slice(-5).map(entry => entry.t),
+                    x: data.slice(-5).map(entry => entry.x),
+                    y: data.slice(-5).map(entry => entry.y),
+                    z: data.slice(-5).map(entry => entry.z)
                 };
             });
 
@@ -52,12 +53,48 @@ const handleExtractMicrocontrollerData = async (req, res) => {
                 x: aggregatedData.x,
                 y: aggregatedData.y,
                 z: aggregatedData.z,
-                parkinson_status: 'abdullah'
             };
 
+
+
+            //Send data to huzaifa
+            const pythonApiResponse = await axios.post('http://127.0.0.1:3002/double-data', completeData);
+            const pythonData = pythonApiResponse.data; //recieve features and from huzaifa
+
+            console.log(`Python Data is: ${pythonData}`)
             await page.close(); // Close the page after each request
 
-            res.status(200).json(completeData);
+            //Save into database
+            const { t, x, y, z } = completeData
+            const parkinson_status = pythonData.label
+
+            const databaseData = await db('patient')
+                .where({ id })
+                .update({ x, y, z, t, parkinson_status })
+                .returning('*');
+
+            function getRandomNumber() {
+                return Math.floor(Math.random() * 10) + 1;
+            }
+
+            const featureExtractedData = {
+                first_name: databaseData[0].first_name,
+                last_name: databaseData[0].last_name,
+                // t: [getRandomNumber()],
+                // x: [getRandomNumber()],
+                // y: [getRandomNumber()],
+                // z: [getRandomNumber()],
+                t: databaseData[0].t,
+                x: databaseData[0].x,
+                y: databaseData[0].y,
+                z: databaseData[0].z,
+                parkinson_status: databaseData[0].parkinson_status,
+                x_mean: pythonData.x_mean,
+                y_mean: pythonData.y_mean,
+                z_mean: pythonData.z_mean
+            };
+            res.status(200).json(featureExtractedData);
+
         }
 
     } catch (error) {
