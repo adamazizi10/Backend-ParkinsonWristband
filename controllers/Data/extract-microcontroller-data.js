@@ -1,62 +1,83 @@
-import axios from 'axios';
-import { JSDOM } from 'jsdom';
+import puppeteer from 'puppeteer';
 
-const handleExtractMicrocontrollerData = async (req, res, db) => {
+let browser; // Declare browser instance outside the handler
+
+const handleExtractMicrocontrollerData = async (req, res) => {
     const id = req.params.id;
-    //start detection or redetect button is clicked on the frontend. Now we get stuties data
+    const { action } = req.body;
+
+    const pageUrl = 'http://10.0.0.157/';
+
     try {
-        // Fetch data from microcontroller server
-        const response = await axios.get('http://127.0.0.1:3003/');
-        const html = response.data;
+        if (action === 'Stop') {
+            if (browser) {
+                await browser.close(); // Close the Puppeteer page
+            }
+        } else {
+            if (!browser) {
+                browser = await puppeteer.launch();
+            }
 
-        const dom = new JSDOM(html);
-        const document = dom.window.document;
+            const page = await browser.newPage(); // Create a new page for each request
+            await page.goto(pageUrl);
+            await page.click('#startBtn');
+            await new Promise(resolve => setTimeout(resolve, 2000));
 
-        const data = { t: [], x: [], y: [], z: [] };
+            const aggregatedData = await page.evaluate(() => {
+                const table = document.getElementById('sensorDataTable');
+                const rows = Array.from(table.rows).slice(1); // Skip the header row
+                const data = rows.map(row => {
+                    const cells = row.cells;
+                    return {
+                        t: cells[0].textContent,
+                        x: cells[1].textContent,
+                        y: cells[2].textContent,
+                        z: cells[3].textContent
+                    };
+                });
 
-        const tableRows = document.querySelectorAll('table tbody tr');
-        tableRows.forEach((row) => {
-            const columns = row.querySelectorAll('td');
-            data.t.push(parseFloat(columns[0].textContent));
-            data.x.push(parseFloat(columns[1].textContent));
-            data.y.push(parseFloat(columns[2].textContent));
-            data.z.push(parseFloat(columns[3].textContent));
-        });
-        //Send Stuti's data to Huzaifa's script here
-        // Make a request to the Python API
-        const pythonApiResponse = await axios.post('http://127.0.0.1:3002/double-data', data);
+                // Trim data to only keep the last 5 entries
+                return {
+                    t: data.slice(-20).map(entry => entry.t),
+                    x: data.slice(-20).map(entry => entry.x),
+                    y: data.slice(-20).map(entry => entry.y),
+                    z: data.slice(-20).map(entry => entry.z)
+                };
+            });
 
-        // Get the result from the Python API
-        const pythonData = pythonApiResponse.data;
+            console.log(aggregatedData);
 
-        // Send the doubled data as a response
-        
+            const completeData = {
+                t: aggregatedData.t,
+                x: aggregatedData.x,
+                y: aggregatedData.y,
+                z: aggregatedData.z,
+                parkinson_status: 'abdullah'
+            };
 
-        // Store the received data in the "patient" database
-        const { t, x, y, z, parkinson_status } = pythonData;
-        // const x = [1,2,3,5,5,1,6,5,4,1]
-        // const y = [1,6,3,1,2,3,1,3,1,2]
-        // const z = [7,3,7,1,3,5,7,1,1,2]
-        // const t = [1,2,3,4,5,6,7,8,9,10]
-        // const parkinson_status = 'nice'
+            await page.close(); // Close the page after each request
 
-        db('patient')
-            .where({ id })
-            .update({ x, y, z, t, parkinson_status })
-            .returning('id') // Return the required fields
-                    .then(data => {
-                        res.status(200).json(data[0]);
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        res.status(500).json({ error: "Internal server error." });
-                    });
-            
+            res.status(200).json(completeData);
+        }
 
     } catch (error) {
-        console.error('Error fetching or parsing data:', error);
-        res.status(500).json({ error: 'An error occurred' });
+        console.error(error);
+        res.status(500).json({ error: "Internal server error." });
     }
 };
 
 export default { handleExtractMicrocontrollerData };
+
+
+
+
+
+/*
+
+ if (action === 'Stop') {
+            if (browser) {
+                await browser.close(); // Close the Puppeteer page
+            }
+        } else {
+
+*/

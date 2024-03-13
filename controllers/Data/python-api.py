@@ -1,36 +1,38 @@
-from flask import Flask, request, jsonify
 import random
+import json
+from flask import Flask, request, jsonify
+from featureExtraction import calculateFeatures
+import pandas as pd
+
+
+input_data = {
+   't': ['30', '30', '0', '0', '0', '0', '0', '0', '0', '0'], 
+   'x': ['0.05', '0.01', '-0.07', '0.01', '0.00', '0.00', '-0.05', '0.00', '0.01', '-0.02'], 
+   'y': ['-4.56', '-4.59', '-4.68', '-4.60', '-4.61', '-4.60', '-4.66', '-4.61', '-4.59', '-4.63'], 
+   'z': ['9.57', '9.53', '9.45', '9.53', '9.52', '9.53', '9.47', '9.52', '9.53', '9.50']
+}
 
 app = Flask(__name__)
-
-def get_random_parkinson_status():
-    statuses = ['none', 'low', 'moderate', 'high']
-    return random.choice(statuses)
-
 @app.route('/double-data', methods=['POST'])
 def double_data():
     try:
-        # Get the input data from the request
-        input_data = request.json
-
-        # Perform the computation (double x, y, z, t)
-        result_data = {
-            't': [2 * val for val in input_data['t']],
-            'x': [2 * val for val in input_data['x']],
-            'y': [2 * val for val in input_data['y']],
-            'z': [2 * val for val in input_data['z']],
-            'parkinson_status': get_random_parkinson_status(),
-        }
-
-        return jsonify(result_data)
+        input_data = request.json  
+        df = pd.DataFrame.from_dict(input_data)
+        df = df.astype(float)
+        featuresJson = calculateFeatures(df['x'], df['y'], df['z'])
+        print(featuresJson)
+        print('----------------------------------------')
+        return featuresJson  
     except Exception as e:
         print('Error processing data:', str(e))
         return jsonify({'error': 'An error occurred'}), 500
+
 
 portNum= 3002
 @app.route('/', methods=['GET'])
 def home():
     return f'<h1>Python Script is running on port {portNum}'
+
 
 
 if __name__ == '__main__':
