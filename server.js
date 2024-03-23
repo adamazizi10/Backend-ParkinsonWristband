@@ -8,6 +8,7 @@ import getAllPatientData from './controllers/Patient/get-all-patient-data.js';
 import registerDoctor from './controllers/Doctor/register-doctor.js'
 import signinDoctor from './controllers/Doctor/signin-doctor.js';
 import getAllDoctorData from './controllers/Doctor/get-all-doctor-data.js';
+import storeLastSetOfData from './controllers/Data/store-last-set-of-data.js';
 
 const db = knex({ 
   client: 'pg',
@@ -35,6 +36,7 @@ app.get('/get-all-doctor-data', (req, res) => getAllDoctorData.handleAllDoctorDa
 
 //Data
 app.get('/extract-microcontroller-data/:id', async (req, res) => extractMicrocontrollerData.handleExtractMicrocontrollerData(req, res, db));
+app.post('/store-last-set-of-data/:id', async (req, res) => storeLastSetOfData.handleStoreLastSetOfData(req, res, db));
 
 const port = 3009
 app.get('/', (req, res) => res.send(`<h1>Parkinson Backend Server is running on port ${port}</h1>`));
