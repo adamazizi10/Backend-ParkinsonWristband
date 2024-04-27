@@ -9,15 +9,16 @@ from scipy.signal import find_peaks
 import time
 import random
 import json
+import pickle
 
-# WINDOW = 5 # Seconds
-# PERIOD = 0.02 # Seconds
-# DATA_POINTS = WINDOW / PERIOD
-# STEP_SIZE = DATA_POINTS / 2 # 50% overlap 
+with open('model.pkl', 'rb') as f:
+    lr = pickle.load(f)
+
+with open('scaler.pkl', 'rb') as f:
+    scaler = pickle.load(f)
 
 # Returns JSON formatted string
 def calculateFeatures(x, y, z):
-  start = time.time()
   X_train = {}
 
   # Mean
@@ -72,52 +73,50 @@ def calculateFeatures(x, y, z):
 
   # positive count
   X_train['x_pos_count'] = np.sum(x > 0)
-  X_train['y_pos_count'] = np.sum(x > 0)
-  X_train['z_pos_count'] = np.sum(x > 0)
+  X_train['y_pos_count'] = np.sum(y > 0)
+  X_train['z_pos_count'] = np.sum(z > 0)
 
   # values above mean
   X_train['x_above_mean'] = np.sum(x > x.mean())
-  X_train['y_above_mean'] = np.sum(x > x.mean())
-  X_train['z_above_mean'] = np.sum(x > x.mean())
+  X_train['y_above_mean'] = np.sum(y > y.mean())
+  X_train['z_above_mean'] = np.sum(z > z.mean())
 
   # number of peaks
   X_train['x_peak_count'] = len(find_peaks(x)[0])
-  X_train['y_peak_count'] = len(find_peaks(x)[0])
-  X_train['z_peak_count'] = len(find_peaks(x)[0])
+  X_train['y_peak_count'] = len(find_peaks(y)[0])
+  X_train['z_peak_count'] = len(find_peaks(z)[0])
 
   # skewness
   X_train['x_skewness'] = stats.skew(x)
-  X_train['y_skewness'] = stats.skew(x)
-  X_train['z_skewness'] = stats.skew(x)
+  X_train['y_skewness'] = stats.skew(y)
+  X_train['z_skewness'] = stats.skew(z)
 
   # kurtosis
   X_train['x_kurtosis'] = stats.kurtosis(x)
-  X_train['y_kurtosis'] = stats.kurtosis(x)
-  X_train['z_kurtosis'] = stats.kurtosis(x)
+  X_train['y_kurtosis'] = stats.kurtosis(y)
+  X_train['z_kurtosis'] = stats.kurtosis(z)
 
   # energy
   X_train['x_energy'] = np.sum(x**2)/100
-  X_train['y_energy'] = np.sum(x**2)/100
-  X_train['z_energy'] = np.sum(x**2/100)
+  X_train['y_energy'] = np.sum(y**2)/100
+  X_train['z_energy'] = np.sum(z**2)/100
 
   # avg resultant
-  # X_train['avg_result_accl'] = ((x.values**2 + y.values**2 + z.values**2)**0.5).mean()
-
-  X_train['label'] = classifer()
-
-  # Add classification accuracy 
+  X_train['avg_result_accl'] = ((x.values**2 + y.values**2 + z.values**2)**0.5).mean()
   
-  end = time.time()
-  X_train['calculation_time'] = end - start
+  X_train['sma'] = np.sum(abs(x)/100) + np.sum(abs(y)/100) + np.sum(abs(z)/100)
+
+  label = classifer(X_train)
+  X_train['label'] = label
 
   return json.dumps(X_train, cls=NpEncoder)
 
 
-def classifer():
-   outputs = ["Level 0", "Level 1", "Level 2", "Level 3"]
-   
-   res = random.choice(outputs)
-   return res
+def classifer(X_train):
+   df = pd.DataFrame([X_train])
+   X_train_lr = scaler.transform(df)
+   pred = lr.predict(X_train_lr)
+   return pred
 
 
 class NpEncoder(json.JSONEncoder):
@@ -129,4 +128,17 @@ class NpEncoder(json.JSONEncoder):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
         return super(NpEncoder, self).default(obj)
-    
+
+# def test():
+#     input_data = {
+#    't': ['30', '30', '0', '0', '0', '0', '0', '0', '0', '0'], 
+#    'x': ['0.05', '0.01', '-0.07', '0.01', '0.00', '0.00', '-0.05', '0.00', '0.01', '-0.02'], 
+#    'y': ['-4.56', '-4.59', '-4.68', '-4.60', '-4.61', '-4.60', '-4.66', '-4.61', '-4.59', '-4.63'], 
+#    'z': ['9.57', '9.53', '9.45', '9.53', '9.52', '9.53', '9.47', '9.52', '9.53', '9.50']
+#     }
+
+#     df = pd.DataFrame.from_dict(input_data)
+#     df = df.astype(float)
+#     calculateFeatures(df['x'], df['y'], df['z'])
+
+# test()
