@@ -55,6 +55,7 @@ app.get('/get-all-doctor-data', (req, res) => getAllDoctorData.handleAllDoctorDa
 app.get('/extract-microcontroller-data/:id', async (req, res) => extractMicrocontrollerData.handleExtractMicrocontrollerData(req, res, db));
 app.post('/store-last-set-of-data/:id', async (req, res) => storeLastSetOfData.handleStoreLastSetOfData(req, res, db));
 
-const port = 3009
+const port = process.env.PORT || 3009; 
 app.get('/', (req, res) => res.send(`<h1>Parkinson Backend Server is running on port ${port}</h1>`));
 app.listen(port, () => console.log(`Parkinson Backend Server is running on port ${port}`));
+
