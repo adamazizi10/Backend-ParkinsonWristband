@@ -9,16 +9,33 @@ import registerDoctor from './controllers/Doctor/register-doctor.js'
 import signinDoctor from './controllers/Doctor/signin-doctor.js';
 import getAllDoctorData from './controllers/Doctor/get-all-doctor-data.js';
 import storeLastSetOfData from './controllers/Data/store-last-set-of-data.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const db = knex({ 
+
+
+//dev
+// const db = knex({ 
+//   client: 'pg',
+//   connection: {
+//     host: '127.0.0.1',
+//     port: 5432,
+//     user: 'adamazizi',
+//     database: 'capstone',
+//   }
+// });
+
+//live
+const db = knex({
   client: 'pg',
-  connection: {
-    host: '127.0.0.1',
-    port: 5432,
-    user: 'adamazizi',
-    database: 'capstone',
-  }
-});
+     connection: {
+       connectionString : process.env.DATABASE_URL,
+       ssl: {
+        rejectUnauthorized: false, 
+      },
+     }
+   });
+
 
 const app = express();
 app.use(express.urlencoded({ extended: false }));
