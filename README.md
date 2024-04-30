@@ -40,30 +40,13 @@ Three options are provided under the physician dashboard: "Add Patient," "Search
   <p>Figure 7: The complete map of the GUI</p>
 </div>
 
-# Patient Profile Page
-The Patient Profile Page is an extremely important page that is splitted into two components. The Tremor Results Graph on the left and the Patient Data on the right. The right side shows the name of the Patient being who is being analyzed, the Parkinson's level of the patient, and the extracted features. Other than the name, the rest of the details change as new data is received (if these data differ). Figure 8 shows the Patient Profile Page.
-
-
-<div align="center">
-  <img width="1509" src="https://github.com/adamazizi10/Frontend-ParkinsonWristband/assets/106051947/c988332c-1c6b-4a16-b397-6baec884f759" alt="Parkinson's Disease GUI Patient Profile Page" />
-  <p>Figure 8: Patient Profile Page</p>
-</div>
-
-# Real-Time Data Plotting (the left side)
-The GUI is fully integrated with the wristband through an internet connection, whether hotspot or WIFI. The wristband uses websockets to stream its live data on a webpage with the IP address of the internet connection. The GUI then accesses that IP address, receives the live data, specifically acceleration data, and plots it indefinitely. Figure 9 shows the indefinite plotting of Real-Time Data from the wristband.
-
-<div align="center">
-  <img width="714" alt="image" src="https://github.com/adamazizi10/Frontend-ParkinsonWristband/assets/106051947/069a876d-97d0-471a-a769-bf169f4e92ed">
-  <p>Figure 9: Indefinite Plotting of Real-Time Data</p>
-</div>
-
 # Information Pipeline
 Five pages communicate with the backend by sending HTTP requests in order to either create/update new data or retrieve previously stored information. The basic HTTP methods of GET, POST, PUT, and DELETE are used. A POST request, which is frequently used in situations like profile creation, sends data to the backend, whereas a GET request normally retrieves data from the backend. PUT requests work similarly to POST requests with the only difference being that POST creates data and PUT updates data. The DELETE request deletes the requested data. 
 There are several ways that data is transmitted, including the request body and the URL. For example, a URL such as hello.com/123, where '123' denotes the request identification, might be used. As an alternative, information can be safely sent via the request body, as demonstrated by 'Name': 'John,' which functions discreetly in the background and is hidden from view.
 
 <div align="center">
   <img width="607" alt="image" src="https://github.com/adamazizi10/Frontend-ParkinsonWristband/assets/106051947/b30da1fd-c2f7-4057-b282-8375a374b6e9">
-  <p>Figure 10: Information Pipeline for Register Physician and Sign In Physician Pages</p>
+  <p>Figure 8: Information Pipeline for Register Physician and Sign In Physician Pages</p>
 </div>
 
 Upon a new physician's registration, the Frontend sends a POST request to the backend, containing the physician's first and last names, email address, and password in the request body. The backend checks to see if the doctor is already listed in the database after obtaining this data. An error is sent if the doctor exists; otherwise, the data is saved. The email address and password are included in the request body of a GET request that the frontend sends to the backend in order to authenticate physicians. The credentials are validated by the backend upon arrival. If this is accurate, the sign-in is permitted, and the doctor's data is received by the Frontend, which stores it locally for easy access. An error message is sent when the credentials are entered incorrectly. 
@@ -71,11 +54,28 @@ The physician dashboard does not currently send HTTP queries to the backend beca
 
 <div align="center">
   <img width="629" alt="image" src="https://github.com/adamazizi10/Frontend-ParkinsonWristband/assets/106051947/4fd49a17-2f86-4736-bc75-fa1443f808ce">
-  <p>Figure 11: Pipeline for Add Patient, Search Patient Profile, and Patient Profile Page</p>
+  <p>Figure 9: Pipeline for Add Patient, Search Patient Profile, and Patient Profile Page</p>
 </div>
 
 The Frontend sends the patient's information, including first_name, last_name, and age, over a POST request whenever a doctor adds a new patient. The backend confirms if the patient already exists after getting this request. If not, the patient's data is added to the 'patient' table along with the doctor's doctor_id, who added the patient. 
 Two immediate GET requests are made when a doctor visits the Search Patient Profile page: "/get_all_patient_data" and "/get_all_doctor_data." In order to facilitate the populating of the corresponding tables in the "search patient page", these requests retrieve all patient and physician data from the backend. Only when the "View Patient" button is pressed does the third GET request, "/get_specific_patient_details," take place, requesting particular details about the chosen patient. The physician receives this request and is taken to the Patient Profile Page, which provides extensive information on the selected patient. Lastly, a request for the patient's data is made on the Patient Profile Page, and the data is then shown on the page. Furthermore, this page retrieves and displays microcontroller data, which ideally represents position data.
+
+# Patient Profile Page
+The Patient Profile Page is an extremely important page that is splitted into two components. The Tremor Results Graph on the left and the Patient Data on the right. The right side shows the name of the Patient being who is being analyzed, the Parkinson's level of the patient, and the extracted features. Other than the name, the rest of the details change as new data is received (if these data differ). Figure 10 shows the Patient Profile Page.
+
+
+<div align="center">
+  <img width="1509" src="https://github.com/adamazizi10/Frontend-ParkinsonWristband/assets/106051947/c988332c-1c6b-4a16-b397-6baec884f759" alt="Parkinson's Disease GUI Patient Profile Page" />
+  <p>Figure 10: Patient Profile Page</p>
+</div>
+
+# Real-Time Data Plotting (the left side)
+The GUI is fully integrated with the wristband through an internet connection, whether hotspot or WIFI. The wristband uses websockets to stream its live data on a webpage with the IP address of the internet connection. The GUI then accesses that IP address, receives the live data, specifically acceleration data, and plots it indefinitely. Figure 11 shows the indefinite plotting of Real-Time Data from the wristband.
+
+<div align="center">
+  <img width="714" alt="image" src="https://github.com/adamazizi10/Frontend-ParkinsonWristband/assets/106051947/069a876d-97d0-471a-a769-bf169f4e92ed">
+  <p>Figure 11: Indefinite Plotting of Real-Time Data</p>
+</div>
 
 # Testing the GUI
 To test the GUI, many approaches were used such as manual testing, creating mock streaming data sets to simulate the wristband, creating mock Machine Learning outputs to mock the real version.
